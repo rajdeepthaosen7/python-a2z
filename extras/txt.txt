@@ -1,0 +1,1 @@
+claude "Build Module 03 — The Data Model, following CLAUDE.md"

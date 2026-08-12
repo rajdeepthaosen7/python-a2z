@@ -1,0 +1,918 @@
+<title>Python for Java Engineers — Build Manifest</title>
+
+<style>
+  /* ============================================================
+     Design plan
+     Color  — "green build": the whole course is make-the-tests-pass.
+              pine #0B6E4F accent, amber #B0761A for work-in-progress,
+              neutrals biased a few degrees green so they sit with it.
+     Type   — display: Segoe UI Variable (tight, wide-tracking caps)
+              prose:   Palatino Linotype (serif, for the reading passages)
+              utility: Cascadia Mono (module ids, weeks, counts)
+     Layout — a build manifest: fixed status rail on the left, phases as
+              target groups on the right, one row per module, each row a
+              target you mark done.
+     ============================================================ */
+
+  :root {
+    --ground:   #ECEEEB;
+    --surface:  #F8F9F7;
+    --raised:   #FFFFFF;
+    --ink:      #141A17;
+    --ink-soft: #47524B;
+    --ink-mute: #77837B;
+    --rule:     #D7DCD6;
+    --rule-firm:#BFC7C0;
+    --accent:   #0B6E4F;
+    --accent-in:#F2F7F3;
+    --amber:    #A06A12;
+    --amber-in: #FBF4E6;
+    --shadow:   0 1px 2px rgba(20, 26, 23, .06), 0 8px 24px -16px rgba(20, 26, 23, .28);
+
+    --display: "Segoe UI Variable Display", "Segoe UI", ui-sans-serif, system-ui, sans-serif;
+    --prose: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Palatino, Georgia, serif;
+    --mono: "Cascadia Mono", "Cascadia Code", ui-monospace, Consolas, "DejaVu Sans Mono", monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ground:   #101512;
+      --surface:  #161C18;
+      --raised:   #1C231E;
+      --ink:      #E6EBE7;
+      --ink-soft: #AEB9B1;
+      --ink-mute: #7C8880;
+      --rule:     #2A332D;
+      --rule-firm:#3A453D;
+      --accent:   #4FBF92;
+      --accent-in:#16261F;
+      --amber:    #D7A24A;
+      --amber-in: #241D10;
+      --shadow:   0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.7);
+    }
+  }
+
+  :root[data-theme="light"] {
+    --ground:#ECEEEB; --surface:#F8F9F7; --raised:#FFFFFF;
+    --ink:#141A17; --ink-soft:#47524B; --ink-mute:#77837B;
+    --rule:#D7DCD6; --rule-firm:#BFC7C0;
+    --accent:#0B6E4F; --accent-in:#F2F7F3; --amber:#A06A12; --amber-in:#FBF4E6;
+    --shadow: 0 1px 2px rgba(20,26,23,.06), 0 8px 24px -16px rgba(20,26,23,.28);
+  }
+  :root[data-theme="dark"] {
+    --ground:#101512; --surface:#161C18; --raised:#1C231E;
+    --ink:#E6EBE7; --ink-soft:#AEB9B1; --ink-mute:#7C8880;
+    --rule:#2A332D; --rule-firm:#3A453D;
+    --accent:#4FBF92; --accent-in:#16261F; --amber:#D7A24A; --amber-in:#241D10;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.7);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--display);
+    font-size: 16px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: clamp(24px, 4vw, 56px) clamp(16px, 4vw, 40px) 96px;
+  }
+
+  /* ---------- masthead ---------- */
+  .masthead { border-bottom: 2px solid var(--ink); padding-bottom: 22px; }
+
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 14px;
+  }
+
+  h1 {
+    font-size: clamp(30px, 5.2vw, 52px);
+    line-height: 1.02;
+    letter-spacing: -.022em;
+    font-weight: 700;
+    margin: 0 0 14px;
+    text-wrap: balance;
+  }
+
+  .standfirst {
+    font-family: var(--prose);
+    font-size: clamp(16px, 1.9vw, 19px);
+    line-height: 1.55;
+    color: var(--ink-soft);
+    max-width: 62ch;
+    margin: 0;
+  }
+
+  .facts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 28px;
+    margin-top: 22px;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--ink-mute);
+  }
+  .facts b { color: var(--ink); font-weight: 600; }
+
+  /* ---------- two-column shell ---------- */
+  .shell {
+    display: grid;
+    grid-template-columns: 232px minmax(0, 1fr);
+    gap: clamp(24px, 3.5vw, 52px);
+    margin-top: 36px;
+    align-items: start;
+  }
+  @media (max-width: 860px) { .shell { grid-template-columns: 1fr; } }
+
+  /* ---------- status rail ---------- */
+  .rail { position: sticky; top: 20px; display: flex; flex-direction: column; gap: 20px; }
+  @media (max-width: 860px) { .rail { position: static; } }
+
+  .gauge {
+    background: var(--raised);
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+    padding: 18px;
+    box-shadow: var(--shadow);
+  }
+  .gauge-top { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+  .gauge-num {
+    font-family: var(--mono);
+    font-size: 34px;
+    font-weight: 600;
+    letter-spacing: -.03em;
+    font-variant-numeric: tabular-nums;
+    color: var(--accent);
+    line-height: 1;
+  }
+  .gauge-lab {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+  }
+  .meter {
+    height: 5px;
+    background: var(--rule);
+    border-radius: 99px;
+    overflow: hidden;
+    margin-top: 14px;
+  }
+  .meter > i {
+    display: block;
+    height: 100%;
+    width: 0%;
+    background: var(--accent);
+    border-radius: 99px;
+    transition: width .45s cubic-bezier(.2,.7,.3,1);
+  }
+  @media (prefers-reduced-motion: reduce) { .meter > i { transition: none; } }
+
+  .gauge-sub {
+    margin-top: 12px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--ink-mute);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .rail-nav { display: flex; flex-direction: column; }
+  .rail-nav h2 {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+    margin: 0 0 10px;
+    font-weight: 600;
+  }
+  .rail-nav a {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 7px 0;
+    border-top: 1px solid var(--rule);
+    color: var(--ink-soft);
+    text-decoration: none;
+    font-size: 13.5px;
+  }
+  .rail-nav a:last-child { border-bottom: 1px solid var(--rule); }
+  .rail-nav a:hover { color: var(--accent); }
+  .rail-nav a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .rail-nav a span {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--ink-mute);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  .btn {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    background: transparent;
+    color: var(--ink-mute);
+    border: 1px solid var(--rule-firm);
+    border-radius: 3px;
+    padding: 8px 10px;
+    cursor: pointer;
+  }
+  .btn:hover { color: var(--ink); border-color: var(--ink-mute); }
+  .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  /* ---------- phases ---------- */
+  .phase { margin-bottom: 44px; scroll-margin-top: 20px; }
+
+  .phase-head {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    flex-wrap: wrap;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--ink);
+  }
+  .phase-id {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 600;
+  }
+  .phase-head h2 {
+    font-size: clamp(20px, 2.6vw, 26px);
+    letter-spacing: -.015em;
+    margin: 0;
+    font-weight: 650;
+    flex: 1 1 auto;
+  }
+  .phase-weeks {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    color: var(--ink-mute);
+    font-variant-numeric: tabular-nums;
+  }
+  .phase-note {
+    font-family: var(--prose);
+    font-size: 15px;
+    color: var(--ink-soft);
+    margin: 12px 0 4px;
+    max-width: 68ch;
+  }
+
+  /* ---------- module rows ---------- */
+  .rows { display: flex; flex-direction: column; }
+
+  .row {
+    display: grid;
+    grid-template-columns: 26px 46px minmax(0, 1fr);
+    gap: 0 14px;
+    align-items: start;
+    padding: 15px 12px 15px 8px;
+    border-bottom: 1px solid var(--rule);
+    margin: 0 -12px 0 -8px;
+    border-radius: 2px;
+    transition: background .15s ease;
+  }
+  .row:hover { background: var(--surface); }
+
+  .row input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 17px;
+    height: 17px;
+    margin: 3px 0 0;
+    border: 1.5px solid var(--rule-firm);
+    border-radius: 3px;
+    background: var(--raised);
+    cursor: pointer;
+    display: grid;
+    place-content: center;
+    flex: none;
+  }
+  .row input[type="checkbox"]::after {
+    content: "";
+    width: 9px;
+    height: 5px;
+    border-left: 2px solid var(--raised);
+    border-bottom: 2px solid var(--raised);
+    transform: rotate(-45deg) translate(1px, -1px);
+    opacity: 0;
+  }
+  .row input[type="checkbox"]:checked { background: var(--accent); border-color: var(--accent); }
+  .row input[type="checkbox"]:checked::after { opacity: 1; }
+  .row input[type="checkbox"]:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .row-id {
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ink-mute);
+    padding-top: 4px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .row-title {
+    font-size: 16.5px;
+    font-weight: 600;
+    letter-spacing: -.008em;
+    margin: 0 0 5px;
+    color: var(--ink);
+  }
+  .row-topics {
+    font-family: var(--prose);
+    font-size: 14.5px;
+    line-height: 1.5;
+    color: var(--ink-soft);
+    margin: 0;
+  }
+
+  .tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 9px; }
+  .tag {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: .04em;
+    color: var(--ink-mute);
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    padding: 2px 6px;
+    white-space: nowrap;
+  }
+  .tag.jd { color: var(--accent); border-color: var(--accent); background: var(--accent-in); }
+  .tag.ready { color: var(--amber); border-color: var(--amber); background: var(--amber-in); }
+
+  .row.done .row-title { color: var(--ink-mute); text-decoration: line-through; text-decoration-thickness: 1px; }
+  .row.done .row-topics { color: var(--ink-mute); }
+
+  /* ---------- athena strip ---------- */
+  .athena {
+    margin-top: 8px;
+    background: var(--raised);
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+    padding: clamp(18px, 2.6vw, 28px);
+    box-shadow: var(--shadow);
+  }
+  .athena h2 { font-size: 22px; margin: 0 0 6px; letter-spacing: -.015em; }
+  .athena > p {
+    font-family: var(--prose);
+    color: var(--ink-soft);
+    margin: 0 0 20px;
+    max-width: 66ch;
+    font-size: 15px;
+  }
+  .stages { display: grid; gap: 1px; background: var(--rule); border: 1px solid var(--rule); border-radius: 2px; overflow: hidden; }
+  .stage {
+    display: grid;
+    grid-template-columns: 86px minmax(0, 1fr);
+    gap: 14px;
+    background: var(--raised);
+    padding: 11px 14px;
+    align-items: baseline;
+  }
+  .stage b {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: .05em;
+    font-weight: 600;
+  }
+  .stage span { font-size: 14.5px; color: var(--ink-soft); font-family: var(--prose); }
+  @media (max-width: 560px) {
+    .stage { grid-template-columns: 1fr; gap: 3px; }
+  }
+
+  /* ---------- loop / footer ---------- */
+  .loop {
+    margin-top: 44px;
+    border-top: 2px solid var(--ink);
+    padding-top: 24px;
+  }
+  .loop h2 { font-size: 22px; margin: 0 0 14px; letter-spacing: -.015em; }
+  .loop ol { margin: 0; padding-left: 20px; max-width: 66ch; font-family: var(--prose); color: var(--ink-soft); }
+  .loop li { margin-bottom: 7px; font-size: 15px; }
+  .loop code, .cmd {
+    font-family: var(--mono);
+    font-size: 13px;
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    padding: 1px 5px;
+    color: var(--ink);
+  }
+  .cmd {
+    display: block;
+    padding: 12px 14px;
+    margin: 18px 0 0;
+    overflow-x: auto;
+    white-space: pre;
+    color: var(--accent);
+  }
+
+  .colophon {
+    margin-top: 40px;
+    padding-top: 16px;
+    border-top: 1px solid var(--rule);
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--ink-mute);
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+</style>
+
+<div class="wrap">
+
+  <header class="masthead">
+    <p class="eyebrow">Build manifest · 24 weeks · 22 targets</p>
+    <h1>Python for Java Engineers,<br>ending in AI Engineering</h1>
+    <p class="standfirst">
+      A dependency-ordered curriculum for someone who already ships Spring Boot. No
+      what-is-a-variable chapter — every module names the Java habit and the Python replacement,
+      then makes you prove it against a test suite. One product, Athena, grows through all
+      twenty-four weeks.
+    </p>
+    <div class="facts">
+      <div><b>Pace</b> 1.5–2h weeknights + weekend build</div>
+      <div><b>Load</b> ~12–15h/week</div>
+      <div><b>Split</b> 50% core Python / 50% AI engineering</div>
+      <div><b>Graded by</b> pytest, ruff, mypy --strict</div>
+    </div>
+  </header>
+
+  <div class="shell">
+
+    <aside class="rail">
+      <div class="gauge">
+        <div class="gauge-top">
+          <div class="gauge-num" id="pct">0%</div>
+          <div class="gauge-lab">complete</div>
+        </div>
+        <div class="meter"><i id="bar"></i></div>
+        <div class="gauge-sub"><span id="count">0 / 22</span> modules · <span id="weeks">week 0</span></div>
+      </div>
+
+      <nav class="rail-nav">
+        <h2>Phases</h2>
+        <a href="#p0">Setup <span id="n-p0">0/1</span></a>
+        <a href="#p1">Language core <span id="n-p1">0/4</span></a>
+        <a href="#p2">Professional <span id="n-p2">0/6</span></a>
+        <a href="#p3">Data &amp; numeric <span id="n-p3">0/3</span></a>
+        <a href="#p4">AI engineering <span id="n-p4">0/7</span></a>
+        <a href="#p5">Capstone <span id="n-p5">0/1</span></a>
+        <a href="#athena">Athena stages <span>18</span></a>
+      </nav>
+
+      <button class="btn" id="reset" type="button">Reset progress</button>
+    </aside>
+
+    <main>
+
+      <!-- ===================== PHASE 0 ===================== -->
+      <section class="phase" id="p0">
+        <div class="phase-head">
+          <span class="phase-id">Phase 0</span>
+          <h2>Professional setup</h2>
+          <span class="phase-weeks">week 0</span>
+        </div>
+        <p class="phase-note">
+          The environment a Python team actually runs in 2026. Do this before anything else —
+          every later module assumes it.
+        </p>
+        <div class="rows">
+          <label class="row">
+            <input type="checkbox" data-m="m00" data-phase="p0">
+            <span class="row-id">00</span>
+            <span>
+              <span class="row-title">Tooling &amp; environment</span>
+              <p class="row-topics">uv, interpreters and virtual environments, pyproject.toml, src layout, ruff, mypy strict, pytest, pre-commit, editor setup. Why there is no classpath.</p>
+              <span class="tags">
+                <span class="tag jd">uv</span><span class="tag jd">ruff</span><span class="tag jd">mypy</span><span class="tag jd">pre-commit</span>
+                <span class="tag ready">built</span>
+              </span>
+            </span>
+          </label>
+        </div>
+      </section>
+
+      <!-- ===================== PHASE 1 ===================== -->
+      <section class="phase" id="p1">
+        <div class="phase-head">
+          <span class="phase-id">Phase 1</span>
+          <h2>Language core, rebuilt for a Java brain</h2>
+          <span class="phase-weeks">weeks 1–4</span>
+        </div>
+        <p class="phase-note">
+          Most Java devs reach "my Python runs" in three days and then plateau there for a year.
+          This phase is about skipping that year.
+        </p>
+        <div class="rows">
+          <label class="row">
+            <input type="checkbox" data-m="m01" data-phase="p1">
+            <span class="row-id">01</span>
+            <span>
+              <span class="row-title">Language core</span>
+              <p class="row-topics">Names vs variables, mutability, truthiness, slicing, comprehensions, unpacking, match/case, f-strings, exceptions, EAFP over LBYL.</p>
+              <span class="tags">
+                <span class="tag">comprehensions</span><span class="tag">slicing</span><span class="tag">EAFP</span>
+                <span class="tag ready">built · 28 functions</span>
+              </span>
+            </span>
+          </label>
+          <label class="row">
+            <input type="checkbox" data-m="m02" data-phase="p1">
+            <span class="row-id">02</span>
+            <span>
+              <span class="row-title">Functions &amp; decorators</span>
+              <p class="row-topics">First-class functions, *args/**kwargs, keyword-only params, the mutable-default trap, closures and nonlocal, decorators, decorator factories, functools.</p>
+              <span class="tags">
+                <span class="tag jd">decorators</span><span class="tag">closures</span><span class="tag">functools</span>
+                <span class="tag ready">built · 18 functions</span>
+              </span>
+            </span>
+          </label>
+          <label class="row">
+            <input type="checkbox" data-m="m03" data-phase="p1">
+            <span class="row-id">03</span>
+            <span>
+              <span class="row-title">The data model</span>
+              <p class="row-topics">Dunder methods, __eq__/__hash__ contracts, dataclasses, Protocol vs ABC, duck typing, iterators, generators, context managers, descriptors, properties.</p>
+              <span class="tags">
+                <span class="tag jd">dataclasses</span><span class="tag jd">generators</span><span class="tag">Protocol</span>
+              </span>
+            </span>
+          </label>
+          <label class="row">
+            <input type="checkbox" data-m="m04" data-phase="p1">
+            <span class="row-id">04</span>
+            <span>
+              <span class="row-title">Stdlib &amp; project structure</span>
+              <p class="row-topics">The import system, packages, circular imports, pathlib, collections, itertools, datetime, json, logging, argparse, subprocess, contextlib.</p>
+              <span class="tags">
+                <span class="tag">pathlib</span><span class="tag">itertools</span><span class="tag jd">logging</span>
+              </span>
+            </span>
+          </label>
+        </div>
+      </section>
+
+      <!-- ===================== PHASE 2 ===================== -->
+      <section class="phase" id="p2">
+        <div class="phase-head">
+          <span class="phase-id">Phase 2</span>
+          <h2>Professional Python</h2>
+          <span class="phase-weeks">weeks 5–10</span>
+        </div>
+        <p class="phase-note">
+          The half of the job that isn't language syntax. This is the phase that makes your
+          Python employable rather than merely working.
+        </p>
+        <div class="rows">
+          <label class="row">
+            <input type="checkbox" data-m="m05" data-phase="p2">
+            <span class="row-id">05</span>
+            <span>
+              <span class="row-title">Typing &amp; Pydantic</span>
+              <p class="row-topics">mypy --strict, generics and TypeVar, Protocol, Literal, TypedDict, overload, variance, ParamSpec, Pydantic v2 models, validators and settings.</p>
+              <span class="tags">
+                <span class="tag jd">type hints</span><span class="tag jd">Pydantic v2</span><span class="tag jd">mypy</span>
+              </span>
+            </span>
+          </label>
+          <label class="row">
+            <input type="checkbox" data-m="m06" data-phase="p2">
+            <span class="row-id">06</span>
+            <span>
+              <span class="row-title">Testing like a pro</span>
+              <p class="row-topics">pytest fixtures and scopes, parametrize, monkeypatch, mocking at boundaries, fakes vs mocks, coverage gates, hypothesis property tests, testcontainers.</p>
+              <span class="tags">
+                <span class="tag jd">pytest</span><span class="tag">hypothesis</span><span class="tag">coverage</span>
+              </span>
+            </span>
+          </label>
+          <label class="row">
+            <input type="checkbox" data-m="m07" data-phase="p2">
+            <span class="row-id">07</span>
+            <span>
+              <span class="row-title">Concurrency &amp; async</span>
+              <p class="row-topics">What the GIL actually does, threads vs processes vs async, the event loop, async/await, TaskGroup, cancellation, anyio, free-threaded CPython.</p>
+              <span class="tags">
+                <span class="tag jd">asyncio</span><span class="tag jd">GIL</span><span class="tag">multiprocessing</span>
+              </span>
+            </span>
+          </label>
+          <label class="row">
+            <input type="checkbox" data-m="m08" data-phase="p2">
+            <span class="row-id">08</span>
+            <span>
+              <span class="row-title">Packaging &amp; delivery</span>
+              <p class="row-topics">Dependency resolution and lockfiles, versioning, publishing wheels, typer CLIs, 12-factor config, structured logging, OpenTelemetry, multi-stage Docker, CI.</p>
+              <span class="tags">
+                <span class="tag jd">Docker</span><span class="tag jd">CI/CD</span><span class="tag">typer</span><span class="tag">structlog</span>
+              </span>
+            </span>
+          </label>
+          <label class="row">
+            <input type="checkbox" data-m="m09" data-phase="p2">
+            <span class="row-id">09</span>
+            <span>
+              <span class="row-title">APIs with FastAPI</span>
+              <p class="row-topics">Your Spring Boot analogue: routing, request/response models, Depends as dependency injection, middleware, JWT/OAuth2 auth, background tasks, streaming, OpenAPI.</p>
+              <span class="tags">
+                <span class="tag jd">FastAPI</span><span class="tag jd">REST</span><span class="tag">OAuth2</span>
+              </span>
+            </span>
+          </label>
+          <label class="row">
+            <input type="checkbox" data-m="m10" data-phase="p2">
+            <span class="row-id">10</span>
+            <span>
+              <span class="row-title">Data persistence</span>
+              <p class="row-topics">SQLAlchemy 2.0 ORM and Core, sessions and unit-of-work, Alembic migrations, transactions and isolation, async drivers, Redis, connection pooling.</p>
+              <span class="tags">
+                <span class="tag jd">SQLAlchemy</span><span class="tag jd">PostgreSQL</span><span class="tag">Alembic</span><span class="tag">Redis</span>
+              </span>
+            </span>
+          </label>
+        </div>
+      </section>
+
+      <!-- ===================== PHASE 3 ===================== -->
+      <section class="phase" id="p3">
+        <div class="phase-head">
+          <span class="phase-id">Phase 3</span>
+          <h2>Data &amp; numeric Python</h2>
+          <span class="phase-weeks">weeks 11–13</span>
+        </div>
+        <p class="phase-note">
+          The bridge into AI work. Vectorized thinking is a genuinely different mental model from
+          the loops you write today, and everything downstream assumes it.
+        </p>
+        <div class="rows">
+          <label class="row">
+            <input type="checkbox" data-m="m11" data-phase="p3">
+            <span class="row-id">11</span>
+            <span>
+              <span class="row-title">NumPy &amp; vectorized thinking</span>
+              <p class="row-topics">ndarray and dtypes, broadcasting, views vs copies, axis semantics, linear algebra, and why an explicit loop is the enemy.</p>
+              <span class="tags"><span class="tag jd">NumPy</span><span class="tag">broadcasting</span></span>
+            </span>
+          </label>
+          <label class="row">
+            <input type="checkbox" data-m="m12" data-phase="p3">
+            <span class="row-id">12</span>
+            <span>
+              <span class="row-title">Pandas &amp; Polars</span>
+              <p class="row-topics">Series and DataFrame, indexing, joins, groupby-agg, reshaping, missing data, time series, the Polars lazy API, Arrow and Parquet.</p>
+              <span class="tags"><span class="tag jd">pandas</span><span class="tag jd">Polars</span><span class="tag">Parquet</span></span>
+            </span>
+          </label>
+          <label class="row">
+            <input type="checkbox" data-m="m13" data-phase="p3">
+            <span class="row-id">13</span>
+            <span>
+              <span class="row-title">Performance engineering</span>
+              <p class="row-topics">cProfile, py-spy, timeit, memory profiling, interpreter overhead vs algorithmic cost, functools.cache, numba, native extensions, when to reach for Rust.</p>
+              <span class="tags"><span class="tag jd">profiling</span><span class="tag">py-spy</span><span class="tag">numba</span></span>
+            </span>
+          </label>
+        </div>
+      </section>
+
+      <!-- ===================== PHASE 4 ===================== -->
+      <section class="phase" id="p4">
+        <div class="phase-head">
+          <span class="phase-id">Phase 4</span>
+          <h2>AI engineering</h2>
+          <span class="phase-weeks">weeks 14–22</span>
+        </div>
+        <p class="phase-note">
+          Not prompt tips. The engineering around models: retrieval, orchestration, evaluation,
+          cost, and the failure modes that only show up in production.
+        </p>
+        <div class="rows">
+          <label class="row">
+            <input type="checkbox" data-m="m14" data-phase="p4">
+            <span class="row-id">14</span>
+            <span>
+              <span class="row-title">LLM fundamentals for engineers</span>
+              <p class="row-topics">Tokenization, context windows, embeddings, sampling parameters, latency and cost math, the Claude and OpenAI SDKs, streaming, structured outputs, tool use.</p>
+              <span class="tags"><span class="tag jd">LLM APIs</span><span class="tag jd">tool use</span><span class="tag">streaming</span></span>
+            </span>
+          </label>
+          <label class="row">
+            <input type="checkbox" data-m="m15" data-phase="p4">
+            <span class="row-id">15</span>
+            <span>
+              <span class="row-title">Prompts as code</span>
+              <p class="row-topics">Templating, versioning, prompt caching, few-shot construction, and how to test a non-deterministic system deterministically.</p>
+              <span class="tags"><span class="tag jd">prompt engineering</span><span class="tag">caching</span></span>
+            </span>
+          </label>
+          <label class="row">
+            <input type="checkbox" data-m="m16" data-phase="p4">
+            <span class="row-id">16</span>
+            <span>
+              <span class="row-title">RAG systems</span>
+              <p class="row-topics">Loaders, chunking strategies, embedding models, vector stores (pgvector, Qdrant, Chroma), hybrid and BM25 search, reranking, retrieval metrics.</p>
+              <span class="tags"><span class="tag jd">RAG</span><span class="tag jd">vector DB</span><span class="tag jd">pgvector</span><span class="tag">reranking</span></span>
+            </span>
+          </label>
+          <label class="row">
+            <input type="checkbox" data-m="m17" data-phase="p4">
+            <span class="row-id">17</span>
+            <span>
+              <span class="row-title">Agents &amp; tool use</span>
+              <p class="row-topics">Agent loops, tool schemas, MCP, planning, memory, multi-agent orchestration, LangGraph and the Claude Agent SDK, and the failure modes nobody blogs about.</p>
+              <span class="tags"><span class="tag jd">agents</span><span class="tag jd">MCP</span><span class="tag">LangGraph</span></span>
+            </span>
+          </label>
+          <label class="row">
+            <input type="checkbox" data-m="m18" data-phase="p4">
+            <span class="row-id">18</span>
+            <span>
+              <span class="row-title">Evals &amp; observability</span>
+              <p class="row-topics">Golden datasets, LLM-as-judge, rubric design, regression gates in CI, tracing with OpenTelemetry and Langfuse, token and cost dashboards, drift.</p>
+              <span class="tags"><span class="tag jd">evals</span><span class="tag jd">observability</span><span class="tag">tracing</span></span>
+            </span>
+          </label>
+          <label class="row">
+            <input type="checkbox" data-m="m19" data-phase="p4">
+            <span class="row-id">19</span>
+            <span>
+              <span class="row-title">Production AI systems</span>
+              <p class="row-topics">Concurrent API fan-out, rate limits, retries with backoff and jitter, semantic caching, budget guards, prompt injection defense, output sanitization, PII.</p>
+              <span class="tags"><span class="tag jd">prompt injection</span><span class="tag jd">cost control</span><span class="tag">rate limits</span></span>
+            </span>
+          </label>
+          <label class="row">
+            <input type="checkbox" data-m="m20" data-phase="p4">
+            <span class="row-id">20</span>
+            <span>
+              <span class="row-title">ML foundations for AI engineers</span>
+              <p class="row-topics">The scikit-learn workflow, train/val/test discipline, metrics, PyTorch tensors and autograd, Hugging Face transformers, local inference, when fine-tuning beats prompting.</p>
+              <span class="tags"><span class="tag jd">PyTorch</span><span class="tag jd">transformers</span><span class="tag">scikit-learn</span></span>
+            </span>
+          </label>
+        </div>
+      </section>
+
+      <!-- ===================== PHASE 5 ===================== -->
+      <section class="phase" id="p5">
+        <div class="phase-head">
+          <span class="phase-id">Phase 5</span>
+          <h2>Capstone</h2>
+          <span class="phase-weeks">weeks 23–24</span>
+        </div>
+        <div class="rows">
+          <label class="row">
+            <input type="checkbox" data-m="m21" data-phase="p5">
+            <span class="row-id">21</span>
+            <span>
+              <span class="row-title">Ship Athena v1.0.0</span>
+              <p class="row-topics">Containerized, typed, tested, traced, evaluated, cost-capped, load-tested. Then write the architecture document and the postmortem — the two artifacts interviewers actually read.</p>
+              <span class="tags"><span class="tag jd">system design</span><span class="tag">load testing</span></span>
+            </span>
+          </label>
+        </div>
+      </section>
+
+      <!-- ===================== ATHENA ===================== -->
+      <section class="athena" id="athena">
+        <h2>Athena — the thread through all 24 weeks</h2>
+        <p>
+          A document intelligence platform. It ingests a corpus, indexes it, searches it, answers
+          questions with citations, and runs multi-step research with an agent — knowing what it
+          costs and proving it hasn't regressed. Never rewritten, only refactored: feeling the pain
+          of stage 1's dicts is what makes stage 3's dataclasses land.
+        </p>
+        <div class="stages">
+          <div class="stage"><b>1 · wk 1</b><span>Stdlib-only CLI: walk a folder, tokenize, build an inverted index, rank by match count</span></div>
+          <div class="stage"><b>2 · wk 2</b><span>Idiomatic refactor: dispatch tables, keyword-only params, a @timed decorator, cached tokenizer</span></div>
+          <div class="stage"><b>3 · wk 3</b><span>Frozen dataclasses, a Corpus class, generator pipeline that streams in constant memory</span></div>
+          <div class="stage"><b>4 · wk 4</b><span>Real package layout, module split, logging, argparse subcommands, TOML config</span></div>
+          <div class="stage"><b>5 · wk 5</b><span>mypy --strict clean, Pydantic models, env config, a generic Repository protocol</span></div>
+          <div class="stage"><b>6 · wk 6</b><span>Test pyramid, tmp_path fixtures, a hypothesis property test, 80% coverage gate</span></div>
+          <div class="stage"><b>7 · wk 7</b><span>Async ingestion with TaskGroup — and a written benchmark explaining the GIL</span></div>
+          <div class="stage"><b>8 · wk 8</b><span>typer CLI, JSON logs, multi-stage Dockerfile under 200 MB, GitHub Actions gate</span></div>
+          <div class="stage"><b>9 · wk 9</b><span>FastAPI service: search endpoints, Depends, API-key auth, background ingestion</span></div>
+          <div class="stage"><b>10 · wk 10</b><span>Postgres + SQLAlchemy 2.0, Alembic migrations, Redis cache, tsvector keyword baseline</span></div>
+          <div class="stage"><b>11 · wk 11–12</b><span>Corpus analytics, Zipf distribution, vectorized TF-IDF, Parquet export, Pandas vs Polars</span></div>
+          <div class="stage"><b>12 · wk 13</b><span>Profile it, get a 10× ingest speedup, add a CI benchmark that fails on regression</span></div>
+          <div class="stage"><b>13 · wk 14–15</b><span>Streaming summarization, structured metadata extraction, versioned prompts, cost logging</span></div>
+          <div class="stage"><b>14 · wk 16</b><span>Real RAG: chunking, pgvector, hybrid retrieval with RRF, reranking, answers with citations</span></div>
+          <div class="stage"><b>15 · wk 17</b><span>A research agent with tools and a step budget, exposed over MCP</span></div>
+          <div class="stage"><b>16 · wk 18</b><span>50 golden Q&amp;A pairs, recall@k and MRR, LLM-judge rubric, CI quality gate, OTel traces</span></div>
+          <div class="stage"><b>17 · wk 19–22</b><span>Backoff, semantic cache, per-tenant budget cap, and a test proving injection can't exfiltrate</span></div>
+          <div class="stage"><b>18 · wk 23–24</b><span>Deploy, load-test, publish p50/p95/p99, write ARCHITECTURE.md and POSTMORTEM.md, tag v1.0.0</span></div>
+        </div>
+      </section>
+
+      <!-- ===================== LOOP ===================== -->
+      <section class="loop">
+        <h2>The loop, every session</h2>
+        <ol>
+          <li>Read the relevant section of the module's <code>LESSON.md</code>.</li>
+          <li>Run the matching file in <code>examples/</code> — then edit it and break it, so you learn to read the traceback.</li>
+          <li>Open the <code>exercises/</code> file and implement the functions. The docstring is the spec; do not open the test first.</li>
+          <li>Run the tests until green.</li>
+          <li>Run ruff and mypy. Green there means idiomatic and type-safe, not merely correct.</li>
+          <li>Reread your own solution and ask what a comprehension, a <code>key=</code>, or a <code>Counter</code> would delete. That question, asked every time, is how fluency happens.</li>
+        </ol>
+        <code class="cmd">uv run pytest modules/m01_language_core -x -q</code>
+      </section>
+
+      <div class="colophon">
+        <span>Progress is stored in this browser only</span>
+        <span>22 modules · 46 graded functions · 215 tests</span>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<script>
+  (function () {
+    var KEY = "py4java.progress.v1";
+    var boxes = Array.prototype.slice.call(document.querySelectorAll('input[data-m]'));
+    var totals = {};
+    boxes.forEach(function (b) { totals[b.dataset.phase] = (totals[b.dataset.phase] || 0) + 1; });
+
+    // Week each module is expected to finish on, so the rail can report a position.
+    var endWeek = { m00:0, m01:1, m02:2, m03:3, m04:4, m05:5, m06:6, m07:7, m08:8, m09:9,
+                    m10:10, m11:11, m12:12, m13:13, m14:15, m15:15, m16:16, m17:17, m18:18,
+                    m19:19, m20:22, m21:24 };
+
+    function load() {
+      try { return JSON.parse(localStorage.getItem(KEY)) || {}; }
+      catch (e) { return {}; }
+    }
+    function save(state) {
+      try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { /* private mode */ }
+    }
+
+    function render() {
+      var done = 0, week = 0, perPhase = {};
+      boxes.forEach(function (box) {
+        var row = box.closest('.row');
+        if (box.checked) {
+          done++;
+          perPhase[box.dataset.phase] = (perPhase[box.dataset.phase] || 0) + 1;
+          if (endWeek[box.dataset.m] > week) { week = endWeek[box.dataset.m]; }
+          row.classList.add('done');
+        } else {
+          row.classList.remove('done');
+        }
+      });
+
+      var pct = Math.round((done / boxes.length) * 100);
+      document.getElementById('pct').textContent = pct + '%';
+      document.getElementById('bar').style.width = pct + '%';
+      document.getElementById('count').textContent = done + ' / ' + boxes.length;
+      document.getElementById('weeks').textContent = done === boxes.length
+        ? 'shipped'
+        : 'week ' + week;
+
+      Object.keys(totals).forEach(function (phase) {
+        var el = document.getElementById('n-' + phase);
+        if (el) { el.textContent = (perPhase[phase] || 0) + '/' + totals[phase]; }
+      });
+    }
+
+    var state = load();
+    boxes.forEach(function (box) {
+      box.checked = !!state[box.dataset.m];
+      box.addEventListener('change', function () {
+        state[box.dataset.m] = box.checked;
+        save(state);
+        render();
+      });
+    });
+
+    document.getElementById('reset').addEventListener('click', function () {
+      state = {};
+      save(state);
+      boxes.forEach(function (b) { b.checked = false; });
+      render();
+    });
+
+    render();
+  })();
+</script>

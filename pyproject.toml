@@ -1,0 +1,95 @@
+[project]
+name = "python-for-java-engineers"
+version = "0.1.0"
+description = "24-week Python + AI Engineering course for a Java/Spring Boot engineer"
+requires-python = ">=3.12"
+dependencies = []
+
+[dependency-groups]
+# Installed by `uv sync`. Grouped by the phase that introduces them so early weeks
+# stay lightweight; uncomment a group when its module tells you to.
+dev = [
+    "pytest>=8.3",
+    "pytest-cov>=6.0",
+    "ruff>=0.9",
+    "mypy>=1.14",
+    "pre-commit>=4.0",
+]
+
+[tool.uv]
+default-groups = ["dev"]
+
+# ---------------------------------------------------------------------------
+# Ruff: linter + formatter. Replaces Checkstyle, SpotBugs, and the formatter.
+# Full rule list: https://docs.astral.sh/ruff/rules/
+# ---------------------------------------------------------------------------
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = [
+    "E", "W",   # pycodestyle
+    "F",        # pyflakes  (unused imports/vars, undefined names)
+    "I",        # isort     (import ordering)
+    "N",        # pep8-naming
+    "UP",       # pyupgrade (modernize syntax automatically)
+    "B",        # flake8-bugbear (real bug patterns, e.g. mutable defaults)
+    "C4",       # comprehension idioms
+    "SIM",      # simplifiable code
+    "RET",      # return-statement smells
+    "PTH",      # use pathlib, not os.path
+    "RUF",      # ruff-native rules
+]
+ignore = [
+    "E501",     # line length is the formatter's job, not the linter's
+    "UP047",    # "use PEP 695 `def f[T]()`". Correct for 3.12+, but this course
+                # teaches TypeVar first because that's what 95% of existing code
+                # uses; Module 05 introduces the new syntax deliberately.
+]
+
+[tool.ruff.lint.per-file-ignores]
+# Exercise stubs intentionally have unused args before you implement them.
+"modules/*/exercises/*.py" = ["ARG001", "ARG002"]
+
+# Example files deliberately contain the anti-patterns they are teaching you to
+# recognize — a mutable class attribute, a `x or default` that eats a falsy 0,
+# a lambda capturing a loop variable. Linting them into correctness would delete
+# the lesson. This is the ONE place in the repo where that trade is acceptable.
+"modules/*/examples/*.py" = [
+    "B018",     # useless expression (demonstrating a TypeError)
+    "B023",     # loop-variable capture (the late-binding demo)
+    "RUF005",   # tuple concatenation (shown on purpose)
+    "RUF012",   # mutable class attribute (the shared-state bug demo)
+    "SIM222",   # `x or "default"` truthiness demos
+    "SIM223",
+    "SIM905",   # literal .split() calls used to show what split does
+    "UP003",    # type(...) used to show tuple-vs-int
+    "UP034",
+]
+
+# ---------------------------------------------------------------------------
+# Mypy: your replacement for javac's type checking. Strict from day one.
+# ---------------------------------------------------------------------------
+[tool.mypy]
+python_version = "3.12"
+strict = true
+warn_unreachable = true
+pretty = true
+show_error_codes = true
+exclude = ["\\.venv"]
+
+[[tool.mypy.overrides]]
+# Exercises are graded by pytest, not mypy — a stub returning NotImplementedError
+# would otherwise be flagged before you've written anything.
+module = "modules.*.exercises.*"
+disallow_untyped_defs = false
+
+# ---------------------------------------------------------------------------
+# Pytest
+# ---------------------------------------------------------------------------
+[tool.pytest.ini_options]
+minversion = "8.0"
+testpaths = ["modules", "project"]
+addopts = "-ra --strict-markers --strict-config"
+pythonpath = ["."]
