@@ -59,6 +59,7 @@ ignore = [
 "modules/*/examples/*.py" = [
     "B018",     # useless expression (demonstrating a TypeError)
     "B023",     # loop-variable capture (the late-binding demo)
+    "C416",     # redundant comprehension (shown beside a genexp for contrast)
     "RUF005",   # tuple concatenation (shown on purpose)
     "RUF012",   # mutable class attribute (the shared-state bug demo)
     "SIM222",   # `x or "default"` truthiness demos
@@ -84,6 +85,15 @@ exclude = ["\\.venv"]
 # would otherwise be flagged before you've written anything.
 module = "modules.*.exercises.*"
 disallow_untyped_defs = false
+
+[[tool.mypy.overrides]]
+# Graders call exercise code that does not exist yet. From Module 03 the stubs
+# include empty classes and dataclasses, so mypy legitimately reports "no such
+# attribute" / "too many arguments" until you implement them — noise, not signal.
+# The graders ARE fully type-checked: step 3 of the procedure in CLAUDE.md runs
+# mypy with `solutions/` copied over `exercises/`, and that must come back clean.
+module = "modules.*.tests.*"
+disable_error_code = ["attr-defined", "call-arg", "operator", "type-var", "misc"]
 
 # ---------------------------------------------------------------------------
 # Pytest

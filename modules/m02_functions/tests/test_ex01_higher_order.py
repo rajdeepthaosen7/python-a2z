@@ -106,9 +106,9 @@ class TestOnce:
         def work() -> int:
             return 1
 
-        assert work.called is False  # type: ignore[attr-defined]
+        assert work.called is False
         work()
-        assert work.called is True  # type: ignore[attr-defined]
+        assert work.called is True
 
     def test_preserves_metadata(self) -> None:
         @once
@@ -125,11 +125,11 @@ class TestCountCalls:
         def work(n: int) -> int:
             return n
 
-        assert work.call_count == 0  # type: ignore[attr-defined]
+        assert work.call_count == 0
         work(1)
         work(2)
         work(3)
-        assert work.call_count == 3  # type: ignore[attr-defined]
+        assert work.call_count == 3
 
     def test_counts_calls_that_raise(self) -> None:
         @count_calls
@@ -139,7 +139,7 @@ class TestCountCalls:
         for _ in range(2):
             with pytest.raises(RuntimeError):
                 boom()
-        assert boom.call_count == 2  # type: ignore[attr-defined]
+        assert boom.call_count == 2
 
     def test_preserves_metadata(self) -> None:
         @count_calls
@@ -157,8 +157,8 @@ class TestCountCalls:
         def b() -> None: ...
 
         a()
-        assert a.call_count == 1  # type: ignore[attr-defined]
-        assert b.call_count == 0  # type: ignore[attr-defined]
+        assert a.call_count == 1
+        assert b.call_count == 0
 
 
 class TestMemoize:
@@ -181,8 +181,8 @@ class TestMemoize:
         identity(1)
         identity(1)
         identity(2)
-        assert identity.misses == 2  # type: ignore[attr-defined]
-        assert identity.hits == 1  # type: ignore[attr-defined]
+        assert identity.misses == 2
+        assert identity.hits == 1
 
     def test_cache_clear_resets_everything(self) -> None:
         calls = []
@@ -194,9 +194,9 @@ class TestMemoize:
 
         work(1)
         work(1)
-        work.cache_clear()  # type: ignore[attr-defined]
-        assert work.hits == 0  # type: ignore[attr-defined]
-        assert work.misses == 0  # type: ignore[attr-defined]
+        work.cache_clear()
+        assert work.hits == 0
+        assert work.misses == 0
         work(1)
         assert calls == [1, 1]  # recomputed after the clear
 
@@ -206,7 +206,7 @@ class TestMemoize:
             return a + b
 
         assert [add(1, 2), add(2, 1), add(1, 2)] == [3, 3, 3]
-        assert add.misses == 2  # type: ignore[attr-defined]
+        assert add.misses == 2
 
     def test_preserves_metadata(self) -> None:
         @memoize

@@ -156,7 +156,11 @@ exactly like a JD ticket.
 - ✅ Module 00 — `SETUP.md`
 - ✅ Module 01 — Language core
 - ✅ Module 02 — Functions & decorators
-- ⏳ Modules 03–21 — generated as you reach them, so the tooling and model advice stays current
+- ✅ Module 03 — The data model
+- ⏳ Modules 04–21 — generated as you reach them, so the tooling and model advice stays current
+
+**386 tests · 88 graded functions and classes · 22 runnable examples**, all verified against
+reference implementations.
 
 Ask for the next module when you finish the current one (or ask for a whole phase ahead of time).
 # python-a2z
